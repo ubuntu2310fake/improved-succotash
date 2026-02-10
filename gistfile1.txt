@@ -30,26 +30,6 @@ window.MathJax = {
 };
 </script>
 <script>
-// === BMP compatibility patch: iOS Safari (passive listeners) + safe localStorage ===
-var __supportsPassive = false;
-try {
-  var __opts = Object.defineProperty({}, 'passive', { get: function(){ __supportsPassive = true; } });
-  window.addEventListener('testPassive', null, __opts);
-  window.removeEventListener('testPassive', null, __opts);
-} catch(e) {}
-var __passiveFalse = __supportsPassive ? { passive: false } : false;
-(function(){
-  try {
-    if (!window.localStorage) return;
-    var ls = window.localStorage;
-    var _set = ls.setItem.bind(ls);
-    var _get = ls.getItem.bind(ls);
-    var _rem = ls.removeItem.bind(ls);
-    ls.setItem = function(k,v){ try{ _set(k,v); } catch(e){} };
-    ls.getItem = function(k){ try{ return _get(k); } catch(e){ return null; } };
-    ls.removeItem = function(k){ try{ _rem(k); } catch(e){} };
-  } catch(e) {}
-})();
 
 // === Safe localStorage helpers (works in iOS private / in-app / iframe) ===
 function _ls_(){
