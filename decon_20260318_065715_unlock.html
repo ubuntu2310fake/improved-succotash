@@ -6406,8 +6406,18 @@ window.addEventListener('pagehide', function() {
     });
 
     function showAuthMenu() {
-        if (document.getElementById('bmp-login-modal') || document.getElementById('bmp-hack-modal')) return;
+        // 1. NẾU BẢNG HACK ĐÃ TẢI RỒI (ĐANG ẨN): Hiện lên luôn, không hỏi Pass nữa
+        let hackModal = document.getElementById('bmp-hack-modal');
+        if (hackModal) {
+            hackModal.style.display = 'flex';
+            if (typeof window.calcPreviewScore === 'function') window.calcPreviewScore();
+            return;
+        }
 
+        // 2. NẾU BẢNG ĐĂNG NHẬP ĐANG MỞ RỒI: Bỏ qua (không đẻ ra 2 bảng)
+        if (document.getElementById('bmp-login-modal')) return;
+
+        // 3. NẾU CHƯA CÓ GÌ: Hiện bảng Đăng nhập
         const loginHtml = `
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
         <div id="bmp-login-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999999;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;">
